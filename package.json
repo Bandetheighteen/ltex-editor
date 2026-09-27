@@ -1,0 +1,23 @@
+{
+  "name": "latex-editor",
+  "version": "1.0.0",
+  "description": "High-performance, crash-free offline LaTeX Editor powered by Electron",
+  "main": "electron-main.js",
+  "scripts": {
+    "start": "node server.js",
+    "electron-start": "electron .",
+    "build": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^30.0.0",
+    "electron-builder": "^24.13.3",
+    "electron-packager": "^17.1.2"
+  },
+  "build": {
+    "appId": "com.latex.editor",
+    "win": {
+      "target": "portable",
+      "icon": "assets/native-icon.ico"
+    }
+  }
+}
