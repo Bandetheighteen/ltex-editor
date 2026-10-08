@@ -65,10 +65,16 @@ And Euler's identity:
     });
     editor.setValue(savedDraft);
 
-    // Save draft automatically on typing
+    // Save draft automatically on typing and debounce compilation
+    let compileTimeout;
     editor.on('change', () => {
         localStorage.setItem('latex_source_code', editor.getValue());
         setStatus('Uncompiled Changes', 'status-ready');
+        
+        clearTimeout(compileTimeout);
+        compileTimeout = setTimeout(() => {
+            compileLatex();
+        }, 1000);
     });
 
     // 4. Configure PDF.js (Offline Local Worker)
@@ -152,23 +158,7 @@ And Euler's identity:
                     const pdfY = y / currentScale;
 
                     try {
-                        let data;
-                        if (window.api) {
-                            data = await window.api.synctex(pageNum, pdfX, pdfY);
-                        } else {
-                            const response = await fetch('/api/synctex', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    page: pageNum,
-                                    x: pdfX,
-                                    y: pdfY
-                                })
-                            });
-                            if (response.ok) {
-                                data = await response.json();
-                            }
-                        }
+                        const data = await window.BackendAdapter.invokeSyncTeX(pageNum, pdfX, pdfY);
 
                         if (data && data.line) {
                             const targetLine = data.line - 1;
@@ -196,50 +186,23 @@ And Euler's identity:
         setStatus('Compiling...', 'status-compiling');
 
         try {
-            if (window.api) {
-                const response = await window.api.compile(code);
-                if (response.pdfBuffer) {
-                    if (currentPdfUrl) {
-                        URL.revokeObjectURL(currentPdfUrl);
-                    }
-                    const blob = new Blob([response.pdfBuffer], { type: 'application/pdf' });
-                    currentPdfUrl = URL.createObjectURL(blob);
-                    
-                    await renderPdf(currentPdfUrl);
-
-                    errorOverlay.classList.add('hidden');
-                    setStatus('Compiled Successfully', 'status-success');
-                } else {
-                    errorLog.textContent = response.log || response.error || 'Unknown compilation failure';
-                    errorOverlay.classList.remove('hidden');
-                    setStatus('Compilation Error', 'status-error');
+            const response = await window.BackendAdapter.invokeCompile(code);
+            
+            if (response.pdfBuffer) {
+                if (currentPdfUrl) {
+                    URL.revokeObjectURL(currentPdfUrl);
                 }
+                const blob = new Blob([response.pdfBuffer], { type: 'application/pdf' });
+                currentPdfUrl = URL.createObjectURL(blob);
+                
+                await renderPdf(currentPdfUrl);
+
+                errorOverlay.classList.add('hidden');
+                setStatus('Compiled Successfully', 'status-success');
             } else {
-                const response = await fetch('/api/compile', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ code })
-                });
-
-                if (response.ok) {
-                    const arrayBuffer = await response.arrayBuffer();
-
-                    if (currentPdfUrl) {
-                        URL.revokeObjectURL(currentPdfUrl);
-                    }
-                    const blob = new Blob([arrayBuffer], { type: 'application/pdf' });
-                    currentPdfUrl = URL.createObjectURL(blob);
-
-                    await renderPdf(currentPdfUrl);
-
-                    errorOverlay.classList.add('hidden');
-                    setStatus('Compiled Successfully', 'status-success');
-                } else {
-                    const data = await response.json();
-                    errorLog.textContent = data.log || data.error || 'Unknown compilation failure';
-                    errorOverlay.classList.remove('hidden');
-                    setStatus('Compilation Error', 'status-error');
-                }
+                errorLog.textContent = response.error || response.log || 'Unknown compilation failure';
+                errorOverlay.classList.remove('hidden');
+                setStatus('Compilation Error', 'status-error');
             }
         } catch (err) {
             errorLog.textContent = err.toString();
