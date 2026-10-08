@@ -1,75 +1,80 @@
 <div align="center">
-  <img src="assets/banner.jpg" alt="Ltex Editor Banner" width="800"/>
+  <img src="assets/banner.jpg" alt="LaTeX Editor Banner" width="800"/>
 
-  # Ltex Editor
+  # LaTeX Editor
   
   **A sleek, local-first LaTeX editor with an Apple HIG-inspired interface.**
 </div>
 
 <br />
 
-## 📖 What is Ltex Editor?
+## 📖 What is LaTeX Editor?
 
-Ltex Editor is a modern, beautifully designed LaTeX editor that runs completely offline on your local machine. Built with web technologies, it offers a dual-mode execution strategy: you can use it as a standalone, native desktop application (powered by Electron) or launch it directly in your web browser via a local Node.js server. 
+LaTeX Editor is a modern, beautifully designed LaTeX editor that runs completely offline on your local machine. It focuses on providing a distraction-free, Apple HIG (Human Interface Guidelines) inspired aesthetic, while remaining incredibly fast and functional.
 
-The editor focuses on providing a distraction-free, Apple HIG (Human Interface Guidelines) inspired aesthetic, while remaining incredibly fast and functional.
+**Fun Fact:** The creator of this project has **zero experience in coding**. Everything you see here was completely **vibe-coded** into existence! ✨
 
-## ✨ Key Features
+---
 
-- **Apple HIG-Inspired UI**: A clean, minimalistic, and intuitive interface featuring a frameless window design on the desktop app.
-- **Dual Execution Modes**: 
-  - **Native Desktop App**: A seamless Electron-based executable with a green desktop icon.
-  - **Web Version**: Runs in your browser via a lightweight local Node.js server with Windows shortcut integration (blue globe icon).
-- **Advanced Code Editor**: Powered by CodeMirror with a custom Monokai theme and a distinctive "white spotlight" active line highlight.
-- **Live PDF Preview**: Blazing fast, fully offline PDF rendering using `PDF.js`, complete with zoom controls.
-- **SyncTeX Integration**: Double-click anywhere on the PDF preview to instantly jump to the corresponding line of LaTeX code in the editor!
-- **Resizable Layout**: A smooth, adjustable dual-pane layout managed by `Split.js`.
-- **100% Offline & Local**: Your documents never leave your computer. Uses your system's existing TeX distribution.
+## 📦 What's inside? (Two Products in One!)
 
-## 🚀 Prerequisites
+We provide **two** different versions of the editor in this repository, sharing the exact same beautiful interface:
 
-Before you begin, ensure you have the following installed on your machine:
-- [Node.js](https://nodejs.org/) (for running the server and building the app)
-- A local TeX distribution like [MiKTeX](https://miktex.org/) or [TeX Live](https://www.tug.org/texlive/)
-  > **Note:** `pdflatex` and `synctex` must be available in your system's `PATH`.
+### 1. The Native Desktop App (Tauri)
+A lightning-fast, standalone desktop executable. It uses **Rust** under the hood to manage memory safely and completely eliminates the crashes and zombie processes that plague other editors.
+*   **Icon:** Features the custom Black & White native icon.
+*   **Best for:** Everyday offline use right from your desktop.
 
-## 🛠️ Installation & Usage
+### 2. The Web Version (Express.js)
+A lightweight Node.js web server that serves the editor directly to your web browser. 
+*   **Icon:** Features the custom Blue web icon.
+*   **Best for:** Running the editor remotely, or if you prefer keeping your workflow strictly inside a web browser.
 
-### 1. Clone the repository
+---
+
+## 🚀 How to Install and Run
+
+### Option 1: Direct Download (Easiest)
+You don't need to know how to code to use this!
+1. Go to the [`release/` folder in this repository](release/).
+2. **For the Native App:** Download and run `LaTeX-Editor-Native-Setup.exe` to install it on your Windows machine.
+3. **For the Web App:** Download `LaTeX-Editor-Web.zip`, extract it, open your terminal inside the folder and run:
+   ```bash
+   npm install
+   npm start
+   ```
+   Then open `http://localhost:3000` in your browser.
+
+*(Note: Both versions require a local TeX distribution like [MiKTeX](https://miktex.org/) installed on your computer so they can compile documents).*
+
+### Option 2: Build from Source (For Developers)
 ```bash
+# Clone the repository
 git clone https://github.com/Bandetheighteen/ltex-editor.git
 cd ltex-editor
-```
 
-### 2. Install dependencies
-```bash
+# Install dependencies
 npm install
+
+# Run the Web Server:
+npm start
+
+# OR Run the Native App in development mode:
+npx tauri dev
 ```
 
-### 3. Run the Web Version
-Start the local server:
-```bash
-npm start # or node server.js
-```
-Then, open your browser and navigate to `http://localhost:3000`.
+---
 
-*(Optional for Windows)*: You can use the provided PowerShell scripts (`install-shortcut.ps1`) to create desktop and start menu shortcuts that run the server silently via VBScript.
+## 🛠️ How it Works
 
-### 4. Run the Native Desktop App (Electron)
-```bash
-npm run start:electron # or electron electron-main.js
-```
+*   **Live PDF Preview:** Blazing fast, fully offline PDF rendering using `PDF.js`.
+*   **Bidirectional SyncTeX:** Double-click anywhere on the PDF preview to instantly jump to the corresponding line of LaTeX code in the editor! 
+*   **Zombie-Process Prevention:** Both the Web and Native backends feature strict 10-second compilation timeouts. If you write a bad LaTeX loop, the app will cleanly terminate the background `pdflatex` process to save your computer's CPU.
+*   **Adapter Layer:** The frontend automatically detects whether it's running in a browser or the native app, routing your compile commands either through HTTP or fast native IPC.
 
-## 🏗️ Architecture
+## 🏗️ How it was Built
 
-Ltex Editor shares the exact same frontend codebase (`public/main.js`) across both its Web and Native modes. 
-- **Graceful Fallback API:** The frontend detects if it's running inside Electron (via `window.api` injected by `preload.js`) and uses IPC channels for rapid communication. If opened in a web browser, it gracefully falls back to standard HTTP `fetch()` requests.
-- **Temporary File Management:** Compilation temporary files are safely written to a session directory in your OS's temp folder.
-
-## 🤝 Contributing
-
-Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/Bandetheighteen/ltex-editor/issues).
-
-## 📝 License
-
-This project is licensed under the MIT License.
+This project is a masterclass in AI-assisted vibe-coding. It was originally built with Electron, but was recently re-architected from the ground up for maximum stability:
+*   **Frontend:** Pure, dependency-free Vanilla JavaScript, HTML, and CSS. `CodeMirror` is used for the text editor.
+*   **Native Backend:** Built with **Tauri v2** and **Rust**. Rust handles the child processes (spawning `pdflatex` and `synctex`) ensuring robust memory safety and IPC communication.
+*   **Web Backend:** Built with **Node.js** and **Express.js**, serving the same exact frontend folder while securely managing child processes on the server.
