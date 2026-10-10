@@ -80,10 +80,6 @@ class BackendAdapter {
                 alert("Failed to save PDF: " + err);
                 return false;
             }
-        } else if (this.isElectron) {
-            // Electron stub
-            console.log("Using Electron IPC for save PDF");
-            return false; 
         } else {
             console.log("Using HTTP Fetch for save PDF (fallback to browser download)");
             if (!currentPdfUrl) return false;
