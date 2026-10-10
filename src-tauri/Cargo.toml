@@ -24,4 +24,4 @@ log = "0.4"
 tauri = { version = "2.12.1", features = [] }
 tauri-plugin-log = "2"
 tempfile = "3"
-rfd = "0.17.2"
+tinyfiledialogs = "3.9.1"

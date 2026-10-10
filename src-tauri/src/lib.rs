@@ -101,11 +101,12 @@ fn save_pdf() -> Result<bool, String> {
         return Err("No compiled PDF found to save.".into());
     }
 
-    if let Some(target_path) = rfd::FileDialog::new()
-        .add_filter("PDF Document", &["pdf"])
-        .set_file_name("document.pdf")
-        .save_file()
-    {
+    if let Some(target_path) = tinyfiledialogs::save_file_dialog_with_filter(
+        "Save PDF Document",
+        "document.pdf",
+        &["*.pdf"],
+        "PDF Document"
+    ) {
         fs::copy(&pdf_path, target_path).map_err(|e| e.to_string())?;
         Ok(true)
     } else {
