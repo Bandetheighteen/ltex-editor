@@ -92,10 +92,32 @@ async fn synctex(page: u32, x: f32, y: f32) -> Result<SyncTexResponse, String> {
     Ok(SyncTexResponse { line: line_num })
 }
 
+#[tauri::command]
+async fn save_pdf() -> Result<bool, String> {
+    let dir = get_workspace_dir().map_err(|e| e.to_string())?;
+    let pdf_path = dir.join("document.pdf");
+    
+    if !pdf_path.exists() {
+        return Err("No compiled PDF found to save.".into());
+    }
+
+    if let Some(target_path) = rfd::AsyncFileDialog::new()
+        .add_filter("PDF Document", &["pdf"])
+        .set_file_name("document.pdf")
+        .save_file()
+        .await
+    {
+        fs::copy(&pdf_path, target_path.path()).map_err(|e| e.to_string())?;
+        Ok(true)
+    } else {
+        Ok(false)
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
   tauri::Builder::default()
-    .invoke_handler(tauri::generate_handler![compile_latex, synctex])
+    .invoke_handler(tauri::generate_handler![compile_latex, synctex, save_pdf])
     .setup(|app| {
       if cfg!(debug_assertions) {
         app.handle().plugin(

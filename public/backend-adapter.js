@@ -70,6 +70,32 @@ class BackendAdapter {
             return null;
         }
     }
+    static async invokeSavePdf(currentPdfUrl) {
+        if (this.isTauri) {
+            console.log("Using Tauri IPC for save PDF");
+            try {
+                return await window.__TAURI__.core.invoke('save_pdf');
+            } catch (err) {
+                console.error("Tauri save PDF error:", err);
+                alert("Failed to save PDF: " + err);
+                return false;
+            }
+        } else if (this.isElectron) {
+            // Electron stub
+            console.log("Using Electron IPC for save PDF");
+            return false; 
+        } else {
+            console.log("Using HTTP Fetch for save PDF (fallback to browser download)");
+            if (!currentPdfUrl) return false;
+            const a = document.createElement('a');
+            a.href = currentPdfUrl;
+            a.download = 'document.pdf';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            return true;
+        }
+    }
 }
 
 window.BackendAdapter = BackendAdapter;

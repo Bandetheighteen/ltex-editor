@@ -212,17 +212,12 @@ And Euler's identity:
     }
 
     // 9. Export PDF Handler
-    document.getElementById('export-btn').addEventListener('click', () => {
-        if (!currentPdfUrl) {
+    document.getElementById('export-btn').addEventListener('click', async () => {
+        if (!currentPdfUrl && !BackendAdapter.isTauri) {
             alert('Please compile the document first to export.');
             return;
         }
-        const a = document.createElement('a');
-        a.href = currentPdfUrl;
-        a.download = 'document.pdf';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+        await BackendAdapter.invokeSavePdf(currentPdfUrl);
     });
 
     // 10. Action Buttons
